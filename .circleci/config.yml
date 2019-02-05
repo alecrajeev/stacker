@@ -49,6 +49,7 @@ jobs:
     steps:
       - checkout
       - run: sudo python setup.py install
+      - run: sudo pip install codecov
       - run: sudo make test-unit
 
   unit-test-35:
@@ -65,7 +66,13 @@ jobs:
     steps:
       - checkout
       - run: sudo python setup.py install
+      - run: sudo pip install codecov
       - run: sudo make test-unit
+      - run: coverage report -m
+      - run: coverage xml
+      - run:
+          command: |
+            curl -s https://codecov.io/bash | bash
 
   functional-test-27:
     docker:
@@ -138,3 +145,5 @@ jobs:
       - run:
           command: |
             tests/cleanup_functional_test_buckets.sh
+
+

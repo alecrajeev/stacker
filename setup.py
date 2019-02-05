@@ -30,6 +30,7 @@ tests_require = [
     "testfixtures~=4.10.0",
     "coverage~=4.3.4",
     "flake8-future-import",
+    "codecov"
 ]
 
 setup_requires = ["nose"]
