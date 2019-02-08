@@ -37,7 +37,7 @@ class TestIAMHooks(unittest.TestCase):
         arn = "fake-arn"
         # Creation response
         response = {
-            "ServerCertificateMetaødata": {
+            "ServerCertificateMetadata": {
                 "Arn": arn
             }
         }
