@@ -7,6 +7,7 @@ import boto3
 from botocore.exceptions import ClientError
 
 from moto import mock_iam
+from awacs.helpers.trust import get_ecs_assumerole_policy
 
 from stacker.hooks.iam import (
     create_ecs_service_role,
@@ -36,7 +37,7 @@ class TestIAMHooks(unittest.TestCase):
         arn = "fake-arn"
         # Creation response
         response = {
-            "ServerCertificateMetadata": {
+            "ServerCertificateMetaødata": {
                 "Arn": arn
             }
         }
@@ -77,14 +78,16 @@ class TestIAMHooks(unittest.TestCase):
         policy_name = "AmazonEC2ContainerServiceRolePolicy"
         with mock_iam():
             client = boto3.client("iam", region_name=REGION)
-            create_ecs_service_role(context=self.context, provider=self.provider)
+            client.create_role(
+                RoleName=role_name,
+                AssumeRolePolicyDocument=get_ecs_assumerole_policy().to_json()
+            )
 
-            self.assertTrue(
+            with self.assertRaises(ClientError):
                 create_ecs_service_role(
                     context=self.context,
                     provider=self.provider,
                 )
-            )
 
             role = client.get_role(RoleName=role_name)
 
