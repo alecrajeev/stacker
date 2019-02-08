@@ -71,3 +71,26 @@ class TestIAMHooks(unittest.TestCase):
                 RoleName=role_name,
                 PolicyName=policy_name
             )
+
+    def test_create_service_role_already_exists(self):
+        role_name = "ecsServiceRole"
+        policy_name = "AmazonEC2ContainerServiceRolePolicy"
+        with mock_iam():
+            client = boto3.client("iam", region_name=REGION)
+            create_ecs_service_role(context=self.context, provider=self.provider)
+
+            self.assertTrue(
+                create_ecs_service_role(
+                    context=self.context,
+                    provider=self.provider,
+                )
+            )
+
+            role = client.get_role(RoleName=role_name)
+
+            self.assertIn("Role", role)
+            self.assertEqual(role_name, role["Role"]["RoleName"])
+            client.get_role_policy(
+                RoleName=role_name,
+                PolicyName=policy_name
+            )
