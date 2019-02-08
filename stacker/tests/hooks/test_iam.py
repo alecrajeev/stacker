@@ -83,11 +83,12 @@ class TestIAMHooks(unittest.TestCase):
                 AssumeRolePolicyDocument=get_ecs_assumerole_policy().to_json()
             )
 
-            with self.assertRaises(ClientError):
+            self.assertTrue(
                 create_ecs_service_role(
                     context=self.context,
                     provider=self.provider,
                 )
+            )
 
             role = client.get_role(RoleName=role_name)
 
