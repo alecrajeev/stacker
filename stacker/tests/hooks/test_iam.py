@@ -105,7 +105,7 @@ class TestIAMHooks(unittest.TestCase):
         with mock_iam():
             client = boto3.client("iam", region_name=REGION)
 
-            with self.assertRaises(ClientException):
+            with self.assertRaises(ClientError):
                 create_ecs_service_role(
                     context=self.context,
                     provider=self.provider,
