@@ -113,7 +113,7 @@ class TestIAMHooks(unittest.TestCase):
             client = boto3.client("iam", region_name=REGION)
             client.create_user(UserName="testing")
             test_cert_name = "MOCK_CERTIFICATE"
-            client.upload_signing_certificate(UserName="testing", CertificateBody=MOCK_CERT, ServerCertificateName=test_cert_name)["Certificate"]
+            client.upload_signing_certificate(UserName="testing", CertificateBody=MOCK_CERT)["Certificate"]
 
             value = ensure_server_cert_exists(
                 context=self.context,
@@ -125,3 +125,9 @@ class TestIAMHooks(unittest.TestCase):
             self.assertEqual(value["cert_name"], test_cert_name)
             print(value["cert_arn"])
 
+    # def test_server_missing(self):
+    #     value = ensure_server_cert_exists(
+    #         context=self.context,
+    #         provider=self.provider,
+    #         prompt=True
+    #     )
