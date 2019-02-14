@@ -12,6 +12,7 @@ from awacs.helpers.trust import get_ecs_assumerole_policy
 from stacker.hooks.iam import (
     create_ecs_service_role,
     _get_cert_arn_from_response,
+    ensure_server_cert_exists,
 )
 
 from ..factories import (
@@ -22,9 +23,17 @@ from ..factories import (
 
 REGION = "us-east-1"
 
-# No test for stacker.hooks.iam.ensure_server_cert_exists until
-# this PR is accepted in moto:
-# https://github.com/spulec/moto/pull/679
+MOCK_CERT = """-----BEGIN CERTIFICATE-----
+MIIBpzCCARACCQCY5yOdxCTrGjANBgkqhkiG9w0BAQsFADAXMRUwEwYDVQQKDAxt
+b3RvIHRlc3RpbmcwIBcNMTgxMTA1MTkwNTIwWhgPMjI5MjA4MTkxOTA1MjBaMBcx
+FTATBgNVBAoMDG1vdG8gdGVzdGluZzCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkC
+gYEA1Jn3g2h7LD3FLqdpcYNbFXCS4V4eDpuTCje9vKFcC3pi/01147X3zdfPy8Mt
+ZhKxcREOwm4NXykh23P9KW7fBovpNwnbYsbPqj8Hf1ZaClrgku1arTVhEnKjx8zO
+vaR/bVLCss4uE0E0VM1tJn/QGQsfthFsjuHtwx8uIWz35tUCAwEAATANBgkqhkiG
+9w0BAQsFAAOBgQBWdOQ7bDc2nWkUhFjZoNIZrqjyNdjlMUndpwREVD7FQ/DuxJMj
+FyDHrtlrS80dPUQWNYHw++oACDpWO01LGLPPrGmuO/7cOdojPEd852q5gd+7W9xt
+8vUH+pBa6IBLbvBp+szli51V3TLSWcoyy4ceJNQU2vCkTLoFdS0RLd/7tQ==
+-----END CERTIFICATE-----"""
 
 
 class TestIAMHooks(unittest.TestCase):
@@ -99,16 +108,20 @@ class TestIAMHooks(unittest.TestCase):
                 PolicyName=policy_name
             )
 
-    def test_create_service_role_invalid_role_name(self):
-        role_name = "@#$@ecsServiceRole"
-        policy_name = "AmazonEC2ContainerServiceRolePolicy"
+    def test_ensure_server_cert_exists(self):
         with mock_iam():
             client = boto3.client("iam", region_name=REGION)
+            client.create_user(UserName="testing")
+            test_cert_name = "MOCK_CERTIFICATE"
+            client.upload_signing_certificate(UserName="testing", CertificateBody=MOCK_CERT, ServerCertificateName=test_cert_name)["Certificate"]
 
-            with self.assertRaises(ClientError):
-                create_ecs_service_role(
-                    context=self.context,
-                    provider=self.provider,
-                    role_name=role_name
-                )
+            value = ensure_server_cert_exists(
+                context=self.context,
+                provider=self.provider,
+                cert_name=test_cert_name
+            )
+
+            self.assertEqual(value["status"], "exists")
+            self.assertEqual(value["cert_name"], test_cert_name)
+            print(value["cert_arn"])
 
