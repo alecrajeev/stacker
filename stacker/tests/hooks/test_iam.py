@@ -98,3 +98,17 @@ class TestIAMHooks(unittest.TestCase):
                 RoleName=role_name,
                 PolicyName=policy_name
             )
+
+    def test_create_service_role_invalid_role_name(self):
+        role_name = "@#$@ecsServiceRole"
+        policy_name = "AmazonEC2ContainerServiceRolePolicy"
+        with mock_iam():
+            client = boto3.client("iam", region_name=REGION)
+
+            with self.assertRaises(ClientException):
+                create_ecs_service_role(
+                    context=self.context,
+                    provider=self.provider,
+                    role_name=role_name
+                )
+
