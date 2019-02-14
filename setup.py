@@ -26,7 +26,7 @@ tests_require = [
     # resolved
     "aws-xray-sdk==1.1.2",
     "mock~=2.0.0",
-    "moto~=1.3.5",
+    "moto~=1.2.0",
     "testfixtures~=4.10.0",
     "coverage~=4.3.4",
     "flake8-future-import",
